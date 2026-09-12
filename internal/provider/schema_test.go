@@ -65,3 +65,19 @@ func TestCameraInfoSchemaIsValid(t *testing.T) {
 		t.Fatalf("invalid camera info schema: %v", diags)
 	}
 }
+
+func TestEmailSchemaIsValid(t *testing.T) {
+	resp := &resource.SchemaResponse{}
+	NewEmailResource().Schema(context.Background(), resource.SchemaRequest{}, resp)
+	if diags := resp.Schema.ValidateImplementation(context.Background()); diags.HasError() {
+		t.Fatalf("invalid Email schema: %v", diags)
+	}
+}
+
+func TestFTPSchemaIsValid(t *testing.T) {
+	resp := &resource.SchemaResponse{}
+	NewFTPResource().Schema(context.Background(), resource.SchemaRequest{}, resp)
+	if diags := resp.Schema.ValidateImplementation(context.Background()); diags.HasError() {
+		t.Fatalf("invalid FTP schema: %v", diags)
+	}
+}

@@ -69,6 +69,11 @@ values are discovered from `GetDevInfo`; they are not duplicated in provider
 configuration. API resources still probe supported command variants because
 Reolink capability reporting varies across firmware releases.
 
+`reolink_email` and `reolink_ftp` manage only their respective enable switch.
+They preserve the existing SMTP/FTP server, credentials, recipients, remote
+directory, schedules, and other firmware-specific fields. Both automatically
+select the legacy or V20 camera API. Import IDs are camera keys.
+
 `reolink_motion_detection` manages the older pixel-motion settings used by
 RLC-410 cameras. Its `sensitivity` is the camera-native 1–50 value and is
 applied uniformly to the camera's existing time periods; their schedule

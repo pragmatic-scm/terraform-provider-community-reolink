@@ -66,7 +66,13 @@ func (p *reolinkProvider) Configure(ctx context.Context, req provider.ConfigureR
 	resp.DataSourceData = registry
 }
 func (p *reolinkProvider) Resources(context.Context) []func() resource.Resource {
-	return []func() resource.Resource{NewAIDetectionResource, NewMotionDetectionResource, NewPushResource}
+	return []func() resource.Resource{
+		NewAIDetectionResource,
+		NewMotionDetectionResource,
+		NewPushResource,
+		NewEmailResource,
+		NewFTPResource,
+	}
 }
 func (p *reolinkProvider) DataSources(context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{NewCameraInfoDataSource}

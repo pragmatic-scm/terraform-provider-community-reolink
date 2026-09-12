@@ -23,12 +23,12 @@ provider "reolink" {
   cameras = var.reolink_cameras
 }
 
-resource "reolink_ai_detection" "inside_garage_people" {
+resource "reolink_ai_detection" "camera8_people" {
   camera      = "camera8"
   channel     = 0
   type        = "people"
   sensitivity = 60
-  delay       = 1
+  delay       = 0
 }
 ```
 
@@ -41,7 +41,7 @@ not manage, which is required across Reolink firmware variants.
 Import IDs use `camera/channel/type`:
 
 ```sh
-terraform import reolink_ai_detection.inside_garage_people camera8/0/people
+terraform import reolink_ai_detection.camera8_people camera8/0/people
 ```
 
 Removing a resource from configuration only stops managing that setting;

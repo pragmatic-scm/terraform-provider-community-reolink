@@ -71,7 +71,22 @@ func New(config Config) (*Client, error) {
 		return nil, fmt.Errorf("camera URL must not contain credentials")
 	}
 	transport := http.DefaultTransport.(*http.Transport).Clone()
-	transport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12, InsecureSkipVerify: config.Insecure} // #nosec G402 -- explicit provider option
+	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12, InsecureSkipVerify: config.Insecure} // #nosec G402 -- explicit provider option
+	if config.Insecure {
+		// Older Reolink firmware only offers pre-TLS-1.2 or RSA key-exchange
+		// cipher suites. The insecure option already opts these private-LAN
+		// cameras out of certificate verification, so enable their legacy TLS
+		// profile as well while retaining modern suites through Go's defaults.
+		tlsConfig.MinVersion = tls.VersionTLS10 // #nosec G402 -- explicit legacy-camera compatibility mode
+		tlsConfig.CipherSuites = append(tlsConfig.CipherSuites,
+			tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
+			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_RSA_WITH_AES_128_CBC_SHA,
+			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+			tls.TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+		)
+	}
+	transport.TLSClientConfig = tlsConfig
 	return &Client{
 		baseURL: strings.TrimRight(config.URL, "/"), username: config.Username, password: config.Password,
 		http: &http.Client{Timeout: 30 * time.Second, Transport: transport},
@@ -147,21 +162,31 @@ func (c *Client) login(ctx context.Context) error {
 }
 
 func (c *Client) Command(ctx context.Context, command string, action int, param any) (*Envelope, error) {
-	if err := c.login(ctx); err != nil {
-		return nil, err
-	}
-	c.mu.Lock()
-	token, apiPath := c.token, c.apiPath
-	c.mu.Unlock()
-	body := []any{map[string]any{"cmd": command, "action": action, "param": param}}
-	responses, err := c.call(ctx, apiPath, command, body, token)
-	if err != nil {
-		return nil, err
-	}
-	if responses[0].Code != 0 {
+	for attempt := 0; attempt < 2; attempt++ {
+		if err := c.login(ctx); err != nil {
+			return nil, err
+		}
+		c.mu.Lock()
+		token, apiPath := c.token, c.apiPath
+		c.mu.Unlock()
+		body := []any{map[string]any{"cmd": command, "action": action, "param": param}}
+		responses, err := c.call(ctx, apiPath, command, body, token)
+		if err != nil {
+			return nil, err
+		}
+		if responses[0].Code == 0 {
+			return &responses[0], nil
+		}
+		if attempt == 0 && responses[0].Error != nil && responses[0].Error.RspCode == -6 {
+			c.mu.Lock()
+			c.token = ""
+			c.expires = time.Time{}
+			c.mu.Unlock()
+			continue
+		}
 		return nil, apiResponseError(command, responses[0])
 	}
-	return &responses[0], nil
+	return nil, fmt.Errorf("Reolink %s authentication retry exhausted", command)
 }
 
 func apiResponseError(command string, response Envelope) error {

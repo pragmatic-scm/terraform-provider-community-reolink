@@ -85,3 +85,39 @@ func TestAPIError(t *testing.T) {
 		t.Fatal("expected API error")
 	}
 }
+
+func TestCommandRelogsAfterTokenExpires(t *testing.T) {
+	var loginCount, commandCount int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/cgi-bin/api.cgi" {
+			http.NotFound(w, r)
+			return
+		}
+		if r.URL.Query().Get("cmd") == "Login" {
+			loginCount++
+			_, _ = w.Write([]byte(`[{"cmd":"Login","code":0,"value":{"Token":{"name":"token","leaseTime":3600}}}]`))
+			return
+		}
+		commandCount++
+		if commandCount == 1 {
+			_, _ = w.Write([]byte(`[{"cmd":"GetPushV20","code":1,"error":{"rspCode":-6,"detail":"please login first"}}]`))
+			return
+		}
+		_, _ = w.Write([]byte(`[{"cmd":"GetPushV20","code":0,"value":{"Push":{"enable":0}}}]`))
+	}))
+	defer server.Close()
+
+	c, err := New(Config{URL: server.URL, Username: "admin", Password: "secret"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := c.Command(context.Background(), "GetPushV20", 1, map[string]any{"channel": 0}); err != nil {
+		t.Fatal(err)
+	}
+	if loginCount != 2 {
+		t.Fatalf("login count=%d, want 2", loginCount)
+	}
+	if commandCount != 2 {
+		t.Fatalf("command count=%d, want 2", commandCount)
+	}
+}

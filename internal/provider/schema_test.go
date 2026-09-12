@@ -6,6 +6,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	frameworkprovider "github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
@@ -40,5 +41,27 @@ func TestMotionDetectionSchemaIsValid(t *testing.T) {
 	}
 	if diags := resp.Schema.ValidateImplementation(context.Background()); diags.HasError() {
 		t.Fatalf("invalid motion detection schema: %v", diags)
+	}
+}
+
+func TestPushSchemaIsValid(t *testing.T) {
+	resp := &resource.SchemaResponse{}
+	NewPushResource().Schema(context.Background(), resource.SchemaRequest{}, resp)
+	if resp.Diagnostics.HasError() {
+		t.Fatalf("resource schema diagnostics: %v", resp.Diagnostics)
+	}
+	if diags := resp.Schema.ValidateImplementation(context.Background()); diags.HasError() {
+		t.Fatalf("invalid Push schema: %v", diags)
+	}
+}
+
+func TestCameraInfoSchemaIsValid(t *testing.T) {
+	resp := &datasource.SchemaResponse{}
+	NewCameraInfoDataSource().Schema(context.Background(), datasource.SchemaRequest{}, resp)
+	if resp.Diagnostics.HasError() {
+		t.Fatalf("data source schema diagnostics: %v", resp.Diagnostics)
+	}
+	if diags := resp.Schema.ValidateImplementation(context.Background()); diags.HasError() {
+		t.Fatalf("invalid camera info schema: %v", diags)
 	}
 }

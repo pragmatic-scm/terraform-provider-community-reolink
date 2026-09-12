@@ -47,6 +47,28 @@ terraform import reolink_ai_detection.camera8_people camera8/0/people
 Removing a resource from configuration only stops managing that setting;
 there is no meaningful camera-side delete operation.
 
+`reolink_push` manages the global Push enable switch while preserving the
+camera's firmware-specific schedule and other fields:
+
+```hcl
+resource "reolink_push" "camera8" {
+  camera  = "camera8"
+  enabled = false
+}
+```
+
+Import IDs are camera keys, for example:
+
+```sh
+terraform import reolink_push.camera8 camera8
+```
+
+`reolink_camera_info` reads the camera's model, exact type, hardware version,
+firmware version, configuration version, build date, and channel count. These
+values are discovered from `GetDevInfo`; they are not duplicated in provider
+configuration. API resources still probe supported command variants because
+Reolink capability reporting varies across firmware releases.
+
 `reolink_motion_detection` manages the older pixel-motion settings used by
 RLC-410 cameras. Its `sensitivity` is the camera-native 1–50 value and is
 applied uniformly to the camera's existing time periods; their schedule

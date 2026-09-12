@@ -25,9 +25,10 @@ type deliveryResource struct {
 }
 
 type deliveryModel struct {
-	ID      types.String `tfsdk:"id"`
-	Camera  types.String `tfsdk:"camera"`
-	Enabled types.Bool   `tfsdk:"enabled"`
+	ID            types.String `tfsdk:"id"`
+	Camera        types.String `tfsdk:"camera"`
+	Enabled       types.Bool   `tfsdk:"enabled"`
+	Configuration types.String `tfsdk:"configuration"`
 }
 
 type deliverySettings struct {
@@ -46,9 +47,10 @@ func (r *deliveryResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 	resp.Schema = schema.Schema{
 		Description: fmt.Sprintf("Manages the Reolink %s enable switch while preserving existing settings.", r.kind),
 		Attributes: map[string]schema.Attribute{
-			"id":      schema.StringAttribute{Computed: true},
-			"camera":  schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
-			"enabled": schema.BoolAttribute{Required: true},
+			"id":            schema.StringAttribute{Computed: true},
+			"camera":        schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
+			"enabled":       schema.BoolAttribute{Required: true},
+			"configuration": schema.StringAttribute{Required: true, Sensitive: true, Description: "JSON object of desired delivery fields loaded from 1Password."},
 		},
 	}
 }
@@ -163,28 +165,48 @@ func (r *deliveryResource) read(ctx context.Context, model *deliveryModel) (*del
 }
 
 func (r *deliveryResource) write(ctx context.Context, model *deliveryModel) error {
-	desired := model.Enabled.ValueBool()
+	desired := *model
 	settings, err := r.read(ctx, model)
 	if err != nil {
 		return err
 	}
 	enable := 0
-	if desired {
+	if desired.Enabled.ValueBool() {
 		enable = 1
 	}
+	var configured map[string]any
+	if err := json.Unmarshal([]byte(desired.Configuration.ValueString()), &configured); err != nil {
+		return fmt.Errorf("decode desired %s configuration: %w", r.kind, err)
+	}
+	for key, value := range configured {
+		settings.value[key] = value
+	}
+	if r.kind == "Email" {
+		delete(settings.value, "supportTextType")
+		delete(settings.value, "supportVideo")
+	}
 	command := "Set" + r.kind + "V20"
-	payload := map[string]any{r.kind: map[string]any{"enable": enable}}
 	if settings.version == 20 {
-		// The minimal switch payload avoids echoing masked credentials returned
-		// by GetEmailV20/GetFtpV20 back into the camera configuration.
+		settings.value["enable"] = enable
 	} else {
 		command = "Set" + r.kind
-		payload = map[string]any{r.kind: map[string]any{"schedule": map[string]any{"enable": enable}}}
+		if r.kind == "Ftp" {
+			delete(settings.value, "onlyFtps")
+			delete(settings.value, "autoDir")
+			delete(settings.value, "picInterval")
+		}
+		schedule, ok := settings.value["schedule"].(map[string]any)
+		if !ok {
+			return fmt.Errorf("legacy %s settings omitted schedule", r.kind)
+		}
+		schedule["enable"] = enable
+		settings.value["schedule"] = schedule
 	}
 	c, _ := r.camera(model.Camera.ValueString())
-	if _, err := c.Command(ctx, command, 0, payload); err != nil {
+	if _, err := c.Command(ctx, command, 0, map[string]any{r.kind: settings.value}); err != nil {
 		return err
 	}
 	_, err = r.read(ctx, model)
+	model.Configuration = desired.Configuration
 	return err
 }

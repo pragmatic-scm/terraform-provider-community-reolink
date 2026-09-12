@@ -70,15 +70,20 @@ configuration. API resources still probe supported command variants because
 Reolink capability reporting varies across firmware releases.
 
 `reolink_email` and `reolink_ftp` manage their respective enable switch and a
-sensitive JSON `configuration` object. Before writing, the provider reads the
+sensitive, write-only JSON `configuration` object. A non-secret
+`configuration_revision` marker is stored in state and triggers an update when
+the associated 1Password item changes. Before writing, the provider reads the
 complete camera object and overlays the declared configuration. This preserves
 schedules, capability fields, and other firmware-specific values that are not
 declared by Terraform. Both resources automatically select the legacy or V20
 camera API. Import IDs are camera keys.
 
-The configuration JSON, including credentials, is stored in Terraform state.
-State and saved plan files must therefore be treated as secrets. Imported
-resources need a configuration value before they can be planned or applied.
+The configuration JSON is available to the provider during apply but is not
+stored in new Terraform state or saved plans. Imported resources need both a
+configuration and revision value before they can be planned or applied. Older
+state and plan files created before this feature may still contain credentials.
+Apply configurations containing write-only values directly; a separately saved
+plan cannot replay values that Terraform deliberately did not retain.
 
 `reolink_motion_detection` manages the older pixel-motion settings used by
 RLC-410 cameras. Its `sensitivity` is the camera-native 1–50 value and is

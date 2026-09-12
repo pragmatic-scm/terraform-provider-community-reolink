@@ -18,6 +18,7 @@ import (
 var _ resource.Resource = (*deliveryResource)(nil)
 var _ resource.ResourceWithConfigure = (*deliveryResource)(nil)
 var _ resource.ResourceWithImportState = (*deliveryResource)(nil)
+var _ resource.ResourceWithUpgradeState = (*deliveryResource)(nil)
 
 type deliveryResource struct {
 	cameras client.Registry
@@ -25,6 +26,14 @@ type deliveryResource struct {
 }
 
 type deliveryModel struct {
+	ID            types.String `tfsdk:"id"`
+	Camera        types.String `tfsdk:"camera"`
+	Enabled       types.Bool   `tfsdk:"enabled"`
+	Configuration types.String `tfsdk:"configuration"`
+	Revision      types.String `tfsdk:"configuration_revision"`
+}
+
+type deliveryModelV0 struct {
 	ID            types.String `tfsdk:"id"`
 	Camera        types.String `tfsdk:"camera"`
 	Enabled       types.Bool   `tfsdk:"enabled"`
@@ -45,12 +54,43 @@ func (r *deliveryResource) Metadata(_ context.Context, req resource.MetadataRequ
 
 func (r *deliveryResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Version:     1,
+		Description: fmt.Sprintf("Manages the Reolink %s enable switch while preserving existing settings.", r.kind),
+		Attributes: map[string]schema.Attribute{
+			"id":                     schema.StringAttribute{Computed: true},
+			"camera":                 schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
+			"enabled":                schema.BoolAttribute{Required: true},
+			"configuration":          schema.StringAttribute{Required: true, Sensitive: true, WriteOnly: true, Description: "Write-only JSON object of desired delivery fields loaded from 1Password."},
+			"configuration_revision": schema.StringAttribute{Required: true, Description: "Non-secret revision marker used to trigger updates when the write-only configuration changes."},
+		},
+	}
+}
+
+func (r *deliveryResource) UpgradeState(_ context.Context) map[int64]resource.StateUpgrader {
+	priorSchema := schema.Schema{
 		Description: fmt.Sprintf("Manages the Reolink %s enable switch while preserving existing settings.", r.kind),
 		Attributes: map[string]schema.Attribute{
 			"id":            schema.StringAttribute{Computed: true},
 			"camera":        schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
 			"enabled":       schema.BoolAttribute{Required: true},
 			"configuration": schema.StringAttribute{Required: true, Sensitive: true, Description: "JSON object of desired delivery fields loaded from 1Password."},
+		},
+	}
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &priorSchema,
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var prior deliveryModelV0
+				resp.Diagnostics.Append(req.State.Get(ctx, &prior)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				upgraded := deliveryModel{
+					ID: prior.ID, Camera: prior.Camera, Enabled: prior.Enabled,
+					Configuration: types.StringNull(), Revision: types.StringNull(),
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &upgraded)...)
+			},
 		},
 	}
 }
@@ -70,13 +110,17 @@ func (r *deliveryResource) Configure(_ context.Context, req resource.ConfigureRe
 func (r *deliveryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan deliveryModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	var config deliveryModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	plan.Configuration = config.Configuration
 	if err := r.write(ctx, &plan); err != nil {
 		resp.Diagnostics.AddError("Unable to configure "+r.kind, err.Error())
 		return
 	}
+	plan.Configuration = types.StringNull()
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -96,13 +140,17 @@ func (r *deliveryResource) Read(ctx context.Context, req resource.ReadRequest, r
 func (r *deliveryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan deliveryModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	var config deliveryModel
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+	plan.Configuration = config.Configuration
 	if err := r.write(ctx, &plan); err != nil {
 		resp.Diagnostics.AddError("Unable to configure "+r.kind, err.Error())
 		return
 	}
+	plan.Configuration = types.StringNull()
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -207,6 +255,5 @@ func (r *deliveryResource) write(ctx context.Context, model *deliveryModel) erro
 		return err
 	}
 	_, err = r.read(ctx, model)
-	model.Configuration = desired.Configuration
 	return err
 }

@@ -90,6 +90,13 @@ RLC-410 cameras. Its `sensitivity` is the camera-native 1–50 value and is
 applied uniformly to the camera's existing time periods; their schedule
 boundaries and other firmware-specific fields are preserved.
 
+`reolink_recording` manages camera recording enablement and its native weekly
+alarm-action schedule. The `schedule` attributes on `reolink_recording`,
+`reolink_email`, and `reolink_ftp` contain JSON because legacy and V20 firmware
+use different schedule structures. The provider reads and writes those native
+objects without normalization. Email and FTP credentials remain separate
+sensitive, write-only configuration.
+
 Run tests with:
 
 ```sh

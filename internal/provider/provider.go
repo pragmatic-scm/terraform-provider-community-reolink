@@ -72,6 +72,7 @@ func (p *reolinkProvider) Resources(context.Context) []func() resource.Resource 
 		NewPushResource,
 		NewEmailResource,
 		NewFTPResource,
+		NewRecordingResource,
 	}
 }
 func (p *reolinkProvider) DataSources(context.Context) []func() datasource.DataSource {

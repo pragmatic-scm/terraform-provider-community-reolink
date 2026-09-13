@@ -81,3 +81,11 @@ func TestFTPSchemaIsValid(t *testing.T) {
 		t.Fatalf("invalid FTP schema: %v", diags)
 	}
 }
+
+func TestRecordingSchemaIsValid(t *testing.T) {
+	resp := &resource.SchemaResponse{}
+	NewRecordingResource().Schema(context.Background(), resource.SchemaRequest{}, resp)
+	if diags := resp.Schema.ValidateImplementation(context.Background()); diags.HasError() {
+		t.Fatalf("invalid recording schema: %v", diags)
+	}
+}

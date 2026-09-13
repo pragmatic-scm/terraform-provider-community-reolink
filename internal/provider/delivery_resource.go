@@ -29,6 +29,15 @@ type deliveryModel struct {
 	ID            types.String `tfsdk:"id"`
 	Camera        types.String `tfsdk:"camera"`
 	Enabled       types.Bool   `tfsdk:"enabled"`
+	Schedule      types.String `tfsdk:"schedule"`
+	Configuration types.String `tfsdk:"configuration"`
+	Revision      types.String `tfsdk:"configuration_revision"`
+}
+
+type deliveryModelV1 struct {
+	ID            types.String `tfsdk:"id"`
+	Camera        types.String `tfsdk:"camera"`
+	Enabled       types.Bool   `tfsdk:"enabled"`
 	Configuration types.String `tfsdk:"configuration"`
 	Revision      types.String `tfsdk:"configuration_revision"`
 }
@@ -54,12 +63,13 @@ func (r *deliveryResource) Metadata(_ context.Context, req resource.MetadataRequ
 
 func (r *deliveryResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Version:     1,
+		Version:     2,
 		Description: fmt.Sprintf("Manages the Reolink %s enable switch while preserving existing settings.", r.kind),
 		Attributes: map[string]schema.Attribute{
 			"id":                     schema.StringAttribute{Computed: true},
 			"camera":                 schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
 			"enabled":                schema.BoolAttribute{Required: true},
+			"schedule":               schema.StringAttribute{Optional: true, Computed: true, Description: "Native JSON schedule object, preserving legacy and V20 alarm tables exactly."},
 			"configuration":          schema.StringAttribute{Required: true, Sensitive: true, WriteOnly: true, Description: "Write-only JSON object of desired delivery fields loaded from 1Password."},
 			"configuration_revision": schema.StringAttribute{Required: true, Description: "Non-secret revision marker used to trigger updates when the write-only configuration changes."},
 		},
@@ -87,8 +97,28 @@ func (r *deliveryResource) UpgradeState(_ context.Context) map[int64]resource.St
 				}
 				upgraded := deliveryModel{
 					ID: prior.ID, Camera: prior.Camera, Enabled: prior.Enabled,
-					Configuration: types.StringNull(), Revision: types.StringNull(),
+					Schedule: types.StringNull(), Configuration: types.StringNull(), Revision: types.StringNull(),
 				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &upgraded)...)
+			},
+		},
+		1: {
+			PriorSchema: func() *schema.Schema {
+				prior := schema.Schema{Version: 1, Attributes: map[string]schema.Attribute{
+					"id": schema.StringAttribute{Computed: true}, "camera": schema.StringAttribute{Required: true},
+					"enabled":                schema.BoolAttribute{Required: true},
+					"configuration":          schema.StringAttribute{Required: true, Sensitive: true, WriteOnly: true},
+					"configuration_revision": schema.StringAttribute{Required: true},
+				}}
+				return &prior
+			}(),
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var prior deliveryModelV1
+				resp.Diagnostics.Append(req.State.Get(ctx, &prior)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				upgraded := deliveryModel{ID: prior.ID, Camera: prior.Camera, Enabled: prior.Enabled, Schedule: types.StringNull(), Configuration: types.StringNull(), Revision: prior.Revision}
 				resp.Diagnostics.Append(resp.State.Set(ctx, &upgraded)...)
 			},
 		},
@@ -200,6 +230,15 @@ func (r *deliveryResource) read(ctx context.Context, model *deliveryModel) (*del
 		return nil, fmt.Errorf("%s omitted %s", envelope.Cmd, r.kind)
 	}
 	model.ID = types.StringValue(model.Camera.ValueString())
+	if schedule, ok := settings["schedule"]; ok {
+		encoded, marshalErr := json.Marshal(schedule)
+		if marshalErr != nil {
+			return nil, fmt.Errorf("encode %s schedule: %w", r.kind, marshalErr)
+		}
+		model.Schedule = types.StringValue(string(encoded))
+	} else {
+		model.Schedule = types.StringNull()
+	}
 	if version == 20 {
 		model.Enabled = types.BoolValue(numberInt(settings["enable"]) != 0)
 	} else {
@@ -228,6 +267,13 @@ func (r *deliveryResource) write(ctx context.Context, model *deliveryModel) erro
 	}
 	for key, value := range configured {
 		settings.value[key] = value
+	}
+	if !desired.Schedule.IsNull() && !desired.Schedule.IsUnknown() {
+		var schedule any
+		if err := json.Unmarshal([]byte(desired.Schedule.ValueString()), &schedule); err != nil {
+			return fmt.Errorf("decode desired %s schedule: %w", r.kind, err)
+		}
+		settings.value["schedule"] = schedule
 	}
 	if r.kind == "Email" {
 		delete(settings.value, "supportTextType")

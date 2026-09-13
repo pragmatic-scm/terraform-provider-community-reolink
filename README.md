@@ -95,3 +95,21 @@ Run tests with:
 ```sh
 go test ./...
 ```
+
+## Validated camera firmware
+
+The following model, hardware, and firmware combinations have passed the
+provider's live read-only API validation and a clean Terraform refresh. The
+diagnostic logs in to the camera and reads device information, capabilities,
+Email/EmailV20, and FTP/FTPV20. The Terraform refresh also reads the configured
+Push and detection resources through the provider. An entry here records a
+version known to work; it is not a statement that older or newer firmware is
+unsupported.
+
+| Model | Hardware | Firmware |
+| --- | --- | --- |
+| Reolink Duo PoE | `IPC_528B174MP` | `v3.0.0.1388_24021900` |
+| RLC-410-5MP | `IPC_515B16M5M` | `v3.0.0.136_20121100` |
+| RLC-510A | `IPC_523128M5MP_V2` | `v3.1.0.801_22010700` |
+| RLC-510A | `IPC_523128M5MP_V2` | `v3.1.0.2368_23062500` |
+| RLC-510A | `IPC_MS4NA45MP` | `v3.2.0.5180_2507241368` |

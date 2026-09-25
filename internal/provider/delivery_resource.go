@@ -18,6 +18,7 @@ import (
 var _ resource.Resource = (*deliveryResource)(nil)
 var _ resource.ResourceWithConfigure = (*deliveryResource)(nil)
 var _ resource.ResourceWithImportState = (*deliveryResource)(nil)
+var _ resource.ResourceWithModifyPlan = (*deliveryResource)(nil)
 var _ resource.ResourceWithUpgradeState = (*deliveryResource)(nil)
 
 type deliveryResource struct {
@@ -135,6 +136,51 @@ func (r *deliveryResource) Configure(_ context.Context, req resource.ConfigureRe
 		return
 	}
 	r.cameras = registry
+}
+
+func (r *deliveryResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	if req.Plan.Raw.IsNull() {
+		return
+	}
+	var plan deliveryModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() || plan.Enabled.IsNull() || plan.Enabled.IsUnknown() || plan.Schedule.IsNull() || plan.Schedule.IsUnknown() {
+		return
+	}
+	schedule, changed, err := scheduleWithEnabled(plan.Schedule.ValueString(), plan.Enabled.ValueBool())
+	if err != nil {
+		resp.Diagnostics.AddAttributeError(path.Root("schedule"), "Invalid delivery schedule", err.Error())
+		return
+	}
+	if changed {
+		resp.Diagnostics.Append(resp.Plan.SetAttribute(ctx, path.Root("schedule"), schedule)...)
+	}
+}
+
+// Legacy Email and Ftp APIs store their enable switch inside the schedule
+// object. Reflect that coupling in the planned schedule so the value returned
+// after SetEmail/SetFtp is consistent with Terraform's plan.
+func scheduleWithEnabled(raw string, enabled bool) (string, bool, error) {
+	var schedule map[string]any
+	if err := json.Unmarshal([]byte(raw), &schedule); err != nil {
+		return "", false, fmt.Errorf("decode schedule: %w", err)
+	}
+	if _, legacy := schedule["enable"]; !legacy {
+		return raw, false, nil
+	}
+	enable := int64(0)
+	if enabled {
+		enable = 1
+	}
+	if numberInt(schedule["enable"]) == enable {
+		return raw, false, nil
+	}
+	schedule["enable"] = enable
+	encoded, err := json.Marshal(schedule)
+	if err != nil {
+		return "", false, fmt.Errorf("encode schedule: %w", err)
+	}
+	return string(encoded), true, nil
 }
 
 func (r *deliveryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {

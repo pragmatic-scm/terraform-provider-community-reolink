@@ -41,14 +41,14 @@ func (d *cameraInfoDataSource) Schema(_ context.Context, _ datasource.SchemaRequ
 		Description: "Reads model, hardware, and firmware metadata from a Reolink camera using GetDevInfo.",
 		Attributes: map[string]schema.Attribute{
 			"camera":           schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
-			"name":             schema.StringAttribute{Computed: true},
-			"model":            schema.StringAttribute{Computed: true},
-			"exact_type":       schema.StringAttribute{Computed: true},
-			"hardware_version": schema.StringAttribute{Computed: true},
-			"firmware_version": schema.StringAttribute{Computed: true},
-			"config_version":   schema.StringAttribute{Computed: true},
-			"build_day":        schema.StringAttribute{Computed: true},
-			"channel_count":    schema.Int64Attribute{Computed: true},
+			"name":             schema.StringAttribute{Computed: true, Description: "Camera-reported device name."},
+			"model":            schema.StringAttribute{Computed: true, Description: "Camera model."},
+			"exact_type":       schema.StringAttribute{Computed: true, Description: "Camera-reported exact device type."},
+			"hardware_version": schema.StringAttribute{Computed: true, Description: "Hardware version."},
+			"firmware_version": schema.StringAttribute{Computed: true, Description: "Firmware version."},
+			"config_version":   schema.StringAttribute{Computed: true, Description: "Configuration version."},
+			"build_day":        schema.StringAttribute{Computed: true, Description: "Firmware build date reported by the camera."},
+			"channel_count":    schema.Int64Attribute{Computed: true, Description: "Number of camera channels."},
 		},
 	}
 }

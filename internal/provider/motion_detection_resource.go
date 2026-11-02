@@ -40,7 +40,7 @@ func (r *motionDetectionResource) Schema(_ context.Context, _ resource.SchemaReq
 	resp.Schema = schema.Schema{Description: "Manages conventional Reolink motion sensitivity using GetMdAlarm and SetMdAlarm.", Attributes: map[string]schema.Attribute{
 		"id":          schema.StringAttribute{Computed: true},
 		"camera":      schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
-		"channel":     schema.Int64Attribute{Optional: true, Computed: true, Default: int64default.StaticInt64(0), Validators: []validator.Int64{int64validator.AtLeast(0)}},
+		"channel":     schema.Int64Attribute{Optional: true, Computed: true, Default: int64default.StaticInt64(0), Description: "Zero-based camera channel. Defaults to 0.", Validators: []validator.Int64{int64validator.AtLeast(0)}},
 		"sensitivity": schema.Int64Attribute{Required: true, Description: "Uniform all-day motion sensitivity.", Validators: []validator.Int64{int64validator.Between(1, 50)}},
 		"scope":       schema.StringAttribute{Optional: true, Computed: true, Description: "Camera-native motion detection mask bit string."},
 	}}

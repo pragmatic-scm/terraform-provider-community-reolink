@@ -43,7 +43,7 @@ func (r *pushResource) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 		Attributes: map[string]schema.Attribute{
 			"id":      schema.StringAttribute{Computed: true},
 			"camera":  schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
-			"enabled": schema.BoolAttribute{Required: true},
+			"enabled": schema.BoolAttribute{Required: true, Description: "Whether camera push notifications are enabled."},
 		},
 	}
 }

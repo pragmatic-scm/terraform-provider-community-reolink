@@ -33,12 +33,12 @@ func (p *reolinkProvider) Metadata(_ context.Context, _ provider.MetadataRequest
 	resp.Version = p.version
 }
 func (p *reolinkProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
-	resp.Schema = schema.Schema{Attributes: map[string]schema.Attribute{
-		"cameras": schema.MapNestedAttribute{Required: true, NestedObject: schema.NestedAttributeObject{Attributes: map[string]schema.Attribute{
-			"url":      schema.StringAttribute{Required: true},
-			"username": schema.StringAttribute{Required: true},
-			"password": schema.StringAttribute{Required: true, Sensitive: true},
-			"insecure": schema.BoolAttribute{Optional: true},
+	resp.Schema = schema.Schema{Description: "Configures connections to one or more standalone Reolink cameras.", Attributes: map[string]schema.Attribute{
+		"cameras": schema.MapNestedAttribute{Required: true, Description: "Map of stable camera keys to Reolink management connections.", NestedObject: schema.NestedAttributeObject{Attributes: map[string]schema.Attribute{
+			"url":      schema.StringAttribute{Required: true, Description: "Base URL of the camera HTTP API."},
+			"username": schema.StringAttribute{Required: true, Description: "Camera administrator username."},
+			"password": schema.StringAttribute{Required: true, Sensitive: true, Description: "Camera administrator password."},
+			"insecure": schema.BoolAttribute{Optional: true, Description: "Disable TLS certificate verification. Use only for cameras whose certificates cannot be verified."},
 		}}},
 	}}
 }

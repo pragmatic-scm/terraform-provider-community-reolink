@@ -69,9 +69,9 @@ func (r *deliveryResource) Schema(_ context.Context, _ resource.SchemaRequest, r
 		Attributes: map[string]schema.Attribute{
 			"id":                     schema.StringAttribute{Computed: true},
 			"camera":                 schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
-			"enabled":                schema.BoolAttribute{Required: true},
+			"enabled":                schema.BoolAttribute{Required: true, Description: fmt.Sprintf("Whether Reolink %s delivery is enabled.", r.kind)},
 			"schedule":               schema.StringAttribute{Optional: true, Computed: true, Description: "Native JSON schedule object, preserving legacy and V20 alarm tables exactly."},
-			"configuration":          schema.StringAttribute{Required: true, Sensitive: true, WriteOnly: true, Description: "Write-only JSON object of desired delivery fields loaded from 1Password."},
+			"configuration":          schema.StringAttribute{Required: true, Sensitive: true, WriteOnly: true, Description: "Write-only JSON object containing the desired delivery configuration. Supply it through a sensitive Terraform value or external secret manager."},
 			"configuration_revision": schema.StringAttribute{Required: true, Description: "Non-secret revision marker used to trigger updates when the write-only configuration changes."},
 		},
 	}
@@ -84,7 +84,7 @@ func (r *deliveryResource) UpgradeState(_ context.Context) map[int64]resource.St
 			"id":            schema.StringAttribute{Computed: true},
 			"camera":        schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
 			"enabled":       schema.BoolAttribute{Required: true},
-			"configuration": schema.StringAttribute{Required: true, Sensitive: true, Description: "JSON object of desired delivery fields loaded from 1Password."},
+			"configuration": schema.StringAttribute{Required: true, Sensitive: true, Description: "JSON object containing the desired delivery configuration."},
 		},
 	}
 	return map[int64]resource.StateUpgrader{

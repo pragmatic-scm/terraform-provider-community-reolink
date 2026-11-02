@@ -34,7 +34,7 @@ func (r *recordingResource) Schema(_ context.Context, _ resource.SchemaRequest, 
 	resp.Schema = schema.Schema{Description: "Manages the Reolink recording enable switch and native alarm schedule.", Attributes: map[string]schema.Attribute{
 		"id":       schema.StringAttribute{Computed: true},
 		"camera":   schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
-		"enabled":  schema.BoolAttribute{Required: true},
+		"enabled":  schema.BoolAttribute{Required: true, Description: "Whether camera recording is enabled."},
 		"schedule": schema.StringAttribute{Required: true, Description: "Native JSON schedule object, preserving legacy and V20 alarm tables exactly."},
 	}}
 }

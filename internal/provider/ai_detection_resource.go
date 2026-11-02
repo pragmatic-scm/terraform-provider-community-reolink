@@ -48,14 +48,14 @@ func (r *aiDetectionResource) Schema(_ context.Context, _ resource.SchemaRequest
 	resp.Schema = schema.Schema{Description: "Manages one Reolink smart-detection class using GetAiAlarm and SetAiAlarm.", Attributes: map[string]schema.Attribute{
 		"id":             schema.StringAttribute{Computed: true},
 		"camera":         schema.StringAttribute{Required: true, Description: "Key in the provider cameras map."},
-		"channel":        schema.Int64Attribute{Optional: true, Computed: true, Default: int64default.StaticInt64(0), Validators: []validator.Int64{int64validator.AtLeast(0)}},
-		"type":           schema.StringAttribute{Required: true, Validators: []validator.String{stringvalidator.OneOf("people", "vehicle", "dog_cat", "face")}},
-		"sensitivity":    schema.Int64Attribute{Required: true, Validators: []validator.Int64{int64validator.Between(0, 100)}},
-		"delay":          schema.Int64Attribute{Optional: true, Computed: true, Default: int64default.StaticInt64(0), Validators: []validator.Int64{int64validator.Between(0, 8)}},
-		"minimum_width":  schema.Float64Attribute{Optional: true, Computed: true},
-		"minimum_height": schema.Float64Attribute{Optional: true, Computed: true},
-		"maximum_width":  schema.Float64Attribute{Optional: true, Computed: true},
-		"maximum_height": schema.Float64Attribute{Optional: true, Computed: true},
+		"channel":        schema.Int64Attribute{Optional: true, Computed: true, Default: int64default.StaticInt64(0), Description: "Zero-based camera channel. Defaults to 0.", Validators: []validator.Int64{int64validator.AtLeast(0)}},
+		"type":           schema.StringAttribute{Required: true, Description: "Detection class: people, vehicle, dog_cat, or face.", Validators: []validator.String{stringvalidator.OneOf("people", "vehicle", "dog_cat", "face")}},
+		"sensitivity":    schema.Int64Attribute{Required: true, Description: "Camera-native AI sensitivity from 0 to 100.", Validators: []validator.Int64{int64validator.Between(0, 100)}},
+		"delay":          schema.Int64Attribute{Optional: true, Computed: true, Default: int64default.StaticInt64(0), Description: "Camera-native alarm delay from 0 to 8. Defaults to 0.", Validators: []validator.Int64{int64validator.Between(0, 8)}},
+		"minimum_width":  schema.Float64Attribute{Optional: true, Computed: true, Description: "Normalized minimum target width."},
+		"minimum_height": schema.Float64Attribute{Optional: true, Computed: true, Description: "Normalized minimum target height."},
+		"maximum_width":  schema.Float64Attribute{Optional: true, Computed: true, Description: "Normalized maximum target width."},
+		"maximum_height": schema.Float64Attribute{Optional: true, Computed: true, Description: "Normalized maximum target height."},
 		"scope":          schema.StringAttribute{Optional: true, Computed: true, Description: "Camera-native AI detection mask bit string."},
 	}}
 }

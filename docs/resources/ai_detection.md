@@ -13,6 +13,8 @@ Manages one Reolink smart-detection class using GetAiAlarm and SetAiAlarm.
 ## Example Usage
 
 ```terraform
+# SPDX-License-Identifier: MPL-2.0
+
 resource "reolink_ai_detection" "people" {
   camera      = "front"
   channel     = 0
@@ -52,5 +54,7 @@ Import is supported using the following syntax:
 The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
+# SPDX-License-Identifier: MPL-2.0
+
 terraform import reolink_ai_detection.people front/0/people
 ```

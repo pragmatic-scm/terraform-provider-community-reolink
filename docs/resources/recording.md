@@ -13,6 +13,8 @@ Manages the Reolink recording enable switch and native alarm schedule.
 ## Example Usage
 
 ```terraform
+# SPDX-License-Identifier: MPL-2.0
+
 variable "reolink_recording_schedule" {
   description = "Camera-native weekly recording schedule encoded as JSON."
   type        = string
@@ -45,5 +47,7 @@ Import is supported using the following syntax:
 The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
+# SPDX-License-Identifier: MPL-2.0
+
 terraform import reolink_recording.front front
 ```

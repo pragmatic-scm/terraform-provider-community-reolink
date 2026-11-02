@@ -13,6 +13,8 @@ Reads model, hardware, and firmware metadata from a Reolink camera using GetDevI
 ## Example Usage
 
 ```terraform
+# SPDX-License-Identifier: MPL-2.0
+
 data "reolink_camera_info" "front" {
   camera = "front"
 }

@@ -13,6 +13,8 @@ Manages the Reolink Ftp enable switch while preserving existing settings.
 ## Example Usage
 
 ```terraform
+# SPDX-License-Identifier: MPL-2.0
+
 variable "reolink_ftp_configuration" {
   type      = string
   sensitive = true
@@ -57,5 +59,7 @@ Import is supported using the following syntax:
 The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
+# SPDX-License-Identifier: MPL-2.0
+
 terraform import reolink_ftp.front front
 ```

@@ -12,6 +12,8 @@ Configures connections to one or more standalone Reolink cameras.
 ## Example Usage
 
 ```terraform
+# SPDX-License-Identifier: MPL-2.0
+
 terraform {
   required_version = ">= 1.11.0"
 

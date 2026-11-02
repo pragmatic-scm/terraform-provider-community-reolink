@@ -13,6 +13,8 @@ Manages Reolink Push notifications using GetPush and SetPush.
 ## Example Usage
 
 ```terraform
+# SPDX-License-Identifier: MPL-2.0
+
 resource "reolink_push" "front" {
   camera  = "front"
   enabled = false
@@ -38,5 +40,7 @@ Import is supported using the following syntax:
 The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
+# SPDX-License-Identifier: MPL-2.0
+
 terraform import reolink_push.front front
 ```

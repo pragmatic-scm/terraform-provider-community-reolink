@@ -13,6 +13,8 @@ Manages conventional Reolink motion sensitivity using GetMdAlarm and SetMdAlarm.
 ## Example Usage
 
 ```terraform
+# SPDX-License-Identifier: MPL-2.0
+
 resource "reolink_motion_detection" "front" {
   camera      = "front"
   channel     = 0
@@ -44,5 +46,7 @@ Import is supported using the following syntax:
 The [`terraform import` command](https://developer.hashicorp.com/terraform/cli/commands/import) can be used, for example:
 
 ```shell
+# SPDX-License-Identifier: MPL-2.0
+
 terraform import reolink_motion_detection.front front/0
 ```

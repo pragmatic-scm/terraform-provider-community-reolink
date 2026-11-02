@@ -2,6 +2,8 @@
 
 # terraform-provider-community-reolink
 
+[![License: MPL-2.0](https://img.shields.io/badge/License-MPL--2.0-blue.svg)](LICENSE)
+
 This provider manages settings on standalone Reolink cameras through the
 camera HTTP API. A single provider configuration accepts a map of camera
 connections, allowing resources to refer to cameras by stable keys without
@@ -134,6 +136,11 @@ go test ./...
 
 Security issues should be reported privately to
 terraform-provider-community-reolink@pragmatic-scm.com.
+
+## License
+
+This project is licensed under the Mozilla Public License 2.0. See
+[LICENSE](LICENSE) for the complete terms.
 
 ## Validated camera firmware
 

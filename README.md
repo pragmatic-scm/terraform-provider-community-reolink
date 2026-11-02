@@ -134,8 +134,17 @@ Run tests with:
 go test ./...
 ```
 
-Security issues should be reported privately to
-terraform-provider-community-reolink@pragmatic-scm.com.
+## Support and contributing
+
+Use the repository's structured
+[issue forms](https://github.com/pragmatic-scm/terraform-provider-community-reolink/issues/new/choose)
+for bug reports and enhancement requests. Include the provider, Terraform,
+camera model, hardware, and firmware versions when reporting compatibility
+problems. See [CONTRIBUTING.md](CONTRIBUTING.md) for development and pull
+request guidance.
+
+Security issues and exposed credentials must not be posted publicly. Follow
+the private reporting instructions in [SECURITY.md](SECURITY.md).
 
 ## License
 

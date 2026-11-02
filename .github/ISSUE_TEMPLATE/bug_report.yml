@@ -1,0 +1,97 @@
+# SPDX-License-Identifier: MPL-2.0
+
+name: Bug report
+description: Report incorrect provider behavior or a camera compatibility problem
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve the provider. Remove credentials, tokens,
+        private addresses, and unredacted camera API output before submitting.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I searched existing issues for this problem.
+          required: true
+        - label: I removed credentials, tokens, private addresses, and other sensitive information.
+          required: true
+        - label: This is not a security vulnerability or exposed credential.
+          required: true
+
+  - type: input
+    id: provider-version
+    attributes:
+      label: Provider version
+      description: Output from the dependency lock file or `terraform providers`.
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: terraform-version
+    attributes:
+      label: Terraform version
+      placeholder: 1.14.7
+    validations:
+      required: true
+
+  - type: input
+    id: camera
+    attributes:
+      label: Camera model, hardware, and firmware
+      description: Include all three when available from the camera information page or data source.
+      placeholder: Reolink Duo PoE / IPC_528B174MP / v3.0.0.1388_24021900
+    validations:
+      required: true
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: Relevant Terraform configuration
+      description: Provide the smallest sanitized configuration that demonstrates the problem.
+      render: hcl
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run terraform plan
+        2. Apply the configuration
+        3. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Sanitized logs or diagnostics
+      description: Do not include passwords, tokens, camera URLs, public IP addresses, or raw API responses.
+      render: shell
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context

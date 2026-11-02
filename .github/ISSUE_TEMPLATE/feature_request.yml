@@ -1,0 +1,58 @@
+# SPDX-License-Identifier: MPL-2.0
+
+name: Feature request
+description: Suggest a provider enhancement or support for another Reolink capability
+title: "[Enhancement]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the desired Terraform behavior rather than including private
+        camera API data. Security reports belong in the private channel in
+        SECURITY.md.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I searched existing issues for this request.
+          required: true
+        - label: I removed credentials, tokens, private addresses, and other sensitive information.
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      description: What are you trying to manage or automate?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed provider behavior
+      description: Describe the resource, data source, or attribute you would like to use.
+      render: hcl
+    validations:
+      required: true
+
+  - type: input
+    id: camera
+    attributes:
+      label: Relevant camera model and firmware
+      description: Optional, but especially useful for camera-specific API capabilities.
+      placeholder: Reolink model / hardware / firmware
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context

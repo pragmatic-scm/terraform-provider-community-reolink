@@ -3,12 +3,10 @@
 # terraform-provider-community-reolink
 
 This provider manages settings on standalone Reolink cameras through the
-camera HTTP API. It is intentionally separate from the ZoneMinder provider.
-
-The provider accepts a map of camera connections so resources can use the same
-stable camera keys as the ZoneMinder camera loader without requiring one
-provider alias per camera. Passwords are sensitive provider configuration and
-are not resource attributes.
+camera HTTP API. A single provider configuration accepts a map of camera
+connections, allowing resources to refer to cameras by stable keys without
+requiring one provider alias per camera. Passwords are sensitive provider
+configuration and are not resource attributes.
 
 ```hcl
 terraform {
@@ -20,17 +18,46 @@ terraform {
 }
 
 provider "reolink" {
-  cameras = var.reolink_cameras
+  cameras = {
+    front = {
+      url      = "https://camera.example.com"
+      username = "admin"
+      password = var.reolink_password
+      insecure = false
+    }
+  }
 }
 
-resource "reolink_ai_detection" "camera8_people" {
-  camera      = "camera8"
+resource "reolink_ai_detection" "front_people" {
+  camera      = "front"
   channel     = 0
   type        = "people"
   sensitivity = 60
   delay       = 0
 }
 ```
+
+Each entry in `cameras` requires `url`, `username`, and `password`. Set the
+optional `insecure` attribute to `true` only when the camera uses a TLS
+certificate that cannot be verified. Supply passwords through sensitive input
+variables or another secret-management mechanism; do not commit them to the
+configuration.
+
+## Resources and data sources
+
+The provider includes these resources:
+
+| Name | Purpose |
+| --- | --- |
+| `reolink_ai_detection` | Smart-detection sensitivity, delay, target dimensions, and mask for one detection class |
+| `reolink_motion_detection` | Conventional pixel-motion sensitivity and mask |
+| `reolink_push` | Push-notification enablement |
+| `reolink_email` | Email enablement, schedule, and configuration |
+| `reolink_ftp` | FTP enablement, schedule, and configuration |
+| `reolink_recording` | Recording enablement and native weekly schedule |
+
+The `reolink_camera_info` data source reads model, hardware, firmware,
+configuration, build-date, and channel-count information from a camera.
 
 `reolink_ai_detection` manages the camera-native `AiAlarm` object. Besides
 sensitivity and alarm delay, it can manage normalized minimum/maximum target
@@ -41,7 +68,7 @@ not manage, which is required across Reolink firmware variants.
 Import IDs use `camera/channel/type`:
 
 ```sh
-terraform import reolink_ai_detection.camera8_people camera8/0/people
+terraform import reolink_ai_detection.front_people front/0/people
 ```
 
 Removing a resource from configuration only stops managing that setting;
@@ -72,8 +99,10 @@ Reolink capability reporting varies across firmware releases.
 `reolink_email` and `reolink_ftp` manage their respective enable switch and a
 sensitive, write-only JSON `configuration` object. A non-secret
 `configuration_revision` marker is stored in state and triggers an update when
-the associated 1Password item changes. Before writing, the provider reads the
-complete camera object and overlays the declared configuration. This preserves
+the externally supplied configuration changes. The marker can be a secret
+version, checksum, timestamp, or another value managed by the calling
+configuration. Before writing, the provider reads the complete camera object
+and overlays the declared configuration. This preserves
 schedules, capability fields, and other firmware-specific values that are not
 declared by Terraform. Both resources automatically select the legacy or V20
 camera API. Import IDs are camera keys.

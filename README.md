@@ -1,6 +1,6 @@
 <!-- SPDX-License-Identifier: MPL-2.0 -->
 
-# Reolink Terraform provider
+# terraform-provider-community-reolink
 
 This provider manages settings on standalone Reolink cameras through the
 camera HTTP API. It is intentionally separate from the ZoneMinder provider.
@@ -14,7 +14,7 @@ are not resource attributes.
 terraform {
   required_providers {
     reolink = {
-      source = "eremington/reolink"
+      source = "pragmatic-scm/community-reolink"
     }
   }
 }
@@ -102,6 +102,9 @@ Run tests with:
 ```sh
 go test ./...
 ```
+
+Security issues should be reported privately to
+terraform-provider-community-reolink@pragmatic-scm.com.
 
 ## Validated camera firmware
 

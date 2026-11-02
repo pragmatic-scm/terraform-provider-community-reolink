@@ -6,12 +6,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/eremington/terraform-provider-reolink/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/pragmatic-scm/terraform-provider-community-reolink/internal/client"
 )
 
 var _ provider.Provider = (*reolinkProvider)(nil)

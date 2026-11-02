@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-module github.com/eremington/terraform-provider-reolink
+module github.com/pragmatic-scm/terraform-provider-community-reolink
 
 go 1.27
 

@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: MPL-2.0
+
+.DS_Store
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform-provider-community-reolink

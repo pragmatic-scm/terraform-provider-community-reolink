@@ -7,10 +7,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/eremington/terraform-provider-reolink/internal/client"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/pragmatic-scm/terraform-provider-community-reolink/internal/client"
 )
 
 var _ datasource.DataSource = (*cameraInfoDataSource)(nil)

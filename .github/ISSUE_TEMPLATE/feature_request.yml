@@ -5,6 +5,7 @@ description: Suggest a provider enhancement or support for another Reolink capab
 title: "[Enhancement]: "
 labels:
   - enhancement
+  - needs-triage
 body:
   - type: markdown
     attributes:

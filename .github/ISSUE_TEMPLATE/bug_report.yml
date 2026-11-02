@@ -5,6 +5,7 @@ description: Report incorrect provider behavior or a camera compatibility proble
 title: "[Bug]: "
 labels:
   - bug
+  - needs-triage
 body:
   - type: markdown
     attributes:

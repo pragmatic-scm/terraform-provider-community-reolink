@@ -153,6 +153,19 @@ This project is licensed under the Mozilla Public License 2.0. See
 
 ## Validated camera firmware
 
+This provider began as a hobby project because I wanted to manage the cameras
+in my own installation with Terraform. The validated models and firmware
+versions below reflect the hardware I currently have available for testing,
+not an intentional limit on what the provider may support. Compatibility
+reports are welcome, and I am open to donated test hardware or safely
+coordinated temporary access to other models and firmware. Never post camera
+credentials or access details in a public issue; open a sanitized issue first
+so any access can be coordinated privately. This remains a hobby project that
+I maintain on a best-effort basis, and I cannot guarantee response or
+turnaround times. Hardware or financial sponsorship may let me dedicate more
+time to testing and development, but it does not by itself create a support
+commitment or service level agreement.
+
 The following model, hardware, and firmware combinations have passed the
 provider's live read-only API validation and a clean Terraform refresh. The
 diagnostic logs in to the camera and reads device information, capabilities,

@@ -27,7 +27,11 @@ type cameraModel struct {
 	Insecure types.Bool   `tfsdk:"insecure"`
 }
 
-func New() provider.Provider { return &reolinkProvider{version: "0.1.0"} }
+func New(version string) func() provider.Provider {
+	return func() provider.Provider {
+		return &reolinkProvider{version: version}
+	}
+}
 func (p *reolinkProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "reolink"
 	resp.Version = p.version

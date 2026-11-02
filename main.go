@@ -10,8 +10,10 @@ import (
 	"github.com/pragmatic-scm/terraform-provider-community-reolink/internal/provider"
 )
 
+var version = "dev"
+
 func main() {
-	err := providerserver.Serve(context.Background(), provider.New, providerserver.ServeOpts{
+	err := providerserver.Serve(context.Background(), provider.New(version), providerserver.ServeOpts{
 		Address: "registry.terraform.io/pragmatic-scm/community-reolink",
 	})
 	if err != nil {

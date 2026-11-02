@@ -13,12 +13,23 @@ import (
 
 func TestProviderSchemaIsValid(t *testing.T) {
 	resp := &frameworkprovider.SchemaResponse{}
-	New().Schema(context.Background(), frameworkprovider.SchemaRequest{}, resp)
+	New("test")().Schema(context.Background(), frameworkprovider.SchemaRequest{}, resp)
 	if resp.Diagnostics.HasError() {
 		t.Fatalf("provider schema diagnostics: %v", resp.Diagnostics)
 	}
 	if diags := resp.Schema.ValidateImplementation(context.Background()); diags.HasError() {
 		t.Fatalf("invalid provider schema: %v", diags)
+	}
+}
+
+func TestProviderMetadataUsesBuildVersion(t *testing.T) {
+	resp := &frameworkprovider.MetadataResponse{}
+	New("1.2.3")().Metadata(context.Background(), frameworkprovider.MetadataRequest{}, resp)
+	if resp.TypeName != "reolink" {
+		t.Fatalf("provider type name = %q, want reolink", resp.TypeName)
+	}
+	if resp.Version != "1.2.3" {
+		t.Fatalf("provider version = %q, want 1.2.3", resp.Version)
 	}
 }
 
